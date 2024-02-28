@@ -1,0 +1,14 @@
+
+
+<div class="max-w-5xl mx-auto">
+
+    <div x-data="directoryTree()" x-init="" 
+        @update-folders.window="folders = event.detail.folders" class="font-sans antialiased text-gray-200">
+
+        <template x-for="(folder, index) in folders" :key="index">
+            <ul wire:ignore class="text-xs select-none" x-html="subfolderHTML(folder, [])"></ul>
+        </template>
+    </div>
+
+</div>
+

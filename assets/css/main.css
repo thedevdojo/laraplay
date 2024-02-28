@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add Your Custom CSS Here */
+[x-cloak]{
+    display: none;
+}
+
+.xterm .xterm-viewport{
+    background-color:#14181f !important;
+}

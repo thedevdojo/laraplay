@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.png">
+    <!-- {tailwindcss} -->
+    <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body class="w-screen h-screen overflow-hidden">
+    {slot}
+    <script src="/assets/js/main.js"></script>
+    <script>
+        console.log('asdf123');
+        mainJSReady = setInterval(function(){
+           console.log('got here');
+            loadTheApp(function(){
+              clearInterval(mainJSReady);
+            });
+  
+          }, 2000);
+  
+            function loadTheApp(callback){
+                if(typeof loadApp == 'function'){
+                    console.log('gtting');
+            
+                // org = window.PineconeRouter.currentContext.params.org;
+                // repo = window.PineconeRouter.currentContext.params.repo;
+                loadApp();
+                if(typeof callback == 'function'){
+                    callback();
+                }
+                }
+            }
+      </script>
+</body>
+</html>
