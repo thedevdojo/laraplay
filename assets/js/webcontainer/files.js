@@ -1,10 +1,19 @@
-/** @satisfies {import('@webcontainer/api').FileSystemTree} */
+/**
+ * This is the
+ * WEB CONTAINER Virtual File System
+ * 
+ * Description:
+ * This JSON file contains the file structure that will live at the root of the webcontainer
+ *
+ * More Info:
+ * Learn more from this URL https://webcontainers.io/guides/working-with-the-file-system
+ */
+
 
 export const files = {
     'index.js': {
       file: {
         contents: `
-        
             import {
                 NodePHP
             } from '@php-wasm/node';
@@ -97,10 +106,6 @@ export const files = {
             
             async function loadFile(){
                 
-                
-  
-                
-  
                 app.all('*', async (req, res) => {
   
                     console.log('accessed' + req.method + ' - ' + req.url);
