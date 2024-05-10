@@ -1,9 +1,11 @@
 import { WebContainer } from '@webcontainer/api';
 import { Terminal } from 'xterm';
-import 'xterm/css/xterm.css';
-import { files } from './files';
-import './libs/directory-tree.js';
+import { FitAddon } from 'xterm-addon-fit';
+// import 'xterm/css/xterm.css';
+import { files } from './webcontainer/files';
+import './webcontainer/directory-tree.js';
 import Alpine from 'alpinejs';
+
 
 let serverReady = false;
 let containerURL = '';
@@ -20,8 +22,10 @@ window.appFiles = [];
 window.Alpine = Alpine;
 window.webcontainer = null;
 
+console.log(window.pathname);
+
 window.org = null;
-window.repo = 'laravel';
+window.repo = window.location.pathname.replace(/^\/|\/$/g, '');
 
 Alpine.start();
 
@@ -35,24 +39,28 @@ window.loadApp = function(sandBoxData){
 
     const terminal = new Terminal({
         convertEol: true,
+        rows: 10
     });
     terminal.open(document.getElementById('terminal'));
+    const fitAddon = new FitAddon();
+    terminal.loadAddon(fitAddon);
+    fitAddon.fit();
 
     window.terminal = terminal;
 
     // create multiple terminals
     const terminals = new Terminal({
         convertEol: true,
+        rows: 10
     });
     terminals.open(document.getElementById('terminals'));
+    const fitAddons = new FitAddon();
+    window.fitAddons = fitAddons;
+    terminal.loadAddon(fitAddons);
+    fitAddons.fit();
 
     window.terminals = terminals;
 
-    // before we boot up a webcontainer we'll make sure to destroy any previous ones.
-    // if(typeof webcontainer != 'undefined'){
-    //     console.log('tearing down');
-    //     webcontainer.teardown();
-    //   }
 
     WebContainer.boot().then(webcontainerInstance => {
         webcontainer = webcontainerInstance;
@@ -77,14 +85,13 @@ window.loadApp = function(sandBoxData){
 
                       webcontainerInstance.on('server-ready', (port, url) => {
 
-                        
-                        
+                        console.log('here!');
+                        console.log(port, url);
 
-                          if(!serverReady){
+                          if(!serverReady && port == '3111'){
                               serverReady = true;
                               containerURL = url;
-
-                              window.dispatchEvent(new CustomEvent('set-url', { detail: { url: containerURL } }));
+                                window.dispatchEvent(new CustomEvent('set-url', { detail: { url: containerURL } }));
                               window.dispatchEvent(new CustomEvent('server-ready', {}));
                           }
                       });

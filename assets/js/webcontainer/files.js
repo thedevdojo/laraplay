@@ -1,10 +1,19 @@
-/** @satisfies {import('@webcontainer/api').FileSystemTree} */
+/**
+ * This is the
+ * WEB CONTAINER Virtual File System
+ * 
+ * Description:
+ * This JSON file contains the file structure that will live at the root of the webcontainer
+ *
+ * More Info:
+ * Learn more from this URL https://webcontainers.io/guides/working-with-the-file-system
+ */
+
 
 export const files = {
     'index.js': {
       file: {
         contents: `
-        
             import {
                 NodePHP
             } from '@php-wasm/node';
@@ -61,6 +70,7 @@ export const files = {
                         return;
                     }
                     
+                    
                     console.log(req.method + ' - ' + req.url);
                     
                     php.addServerGlobalEntry('SCRIPT_NAME', '/index.php');
@@ -74,13 +84,35 @@ export const files = {
                         formData: req.body,
                     });
   
-                    res.status(response.httpStatusCode);
+                    console.log(response.httpStatusCode);
+                    console.log('update');
+                    console.log(response);
   
-                    for (const [key, value] of Object.entries(response.headers)) {
-                        res.set(key, value.join(''));
+                    // if the response is a 302 status code redirect to the location
+                    if(response.httpStatusCode == 302){
+                        try{
+                            let redirectURL = '/';
+                            if(startsWithHttp(response.headers.location[0])){
+                                redirectURL = new URL(response.headers.location[0]);
+                                console.log('attempting to redirect to: ' + redirectURL.pathname);
+                            } else {
+                                redirectURL = (startsWithSlash(response.headers.location[0]) ? '' : '/') + response.headers.location[0];
+                            }
+                            res.redirect(302, redirectURL.pathname);
+                        } catch (error) {
+                            // If parsing fails again, the URL might be malformed
+                            console.error('Invalid URL:', response.headers.location);
+                            return null; // or handle as needed
+                        }
+                    } else {
+                        res.status(response.httpStatusCode);
+  
+                        for (const [key, value] of Object.entries(response.headers)) {
+                            res.set(key, value.join(''));
+                        }
+  
+                        res.send(response.text);
                     }
-  
-                    res.send(response.text);
                     
                 });
   
@@ -97,10 +129,6 @@ export const files = {
             
             async function loadFile(){
                 
-                
-  
-                
-  
                 app.all('*', async (req, res) => {
   
                     console.log('accessed' + req.method + ' - ' + req.url);
@@ -145,6 +173,16 @@ export const files = {
                     // res.send(response.text);
                     
                 });
+            }
+
+            function startsWithHttp(url) {
+                // This regular expression matches strings that start with 'http://' or 'https://'
+                const pattern = /^(http:\\/\\/|https:\\/\\/)/;
+                return pattern.test(url);
+              }
+
+            function startsWithSlash(str) {
+                return str.charAt(0) === '/';
             }
             
             
