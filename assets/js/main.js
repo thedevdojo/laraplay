@@ -196,6 +196,11 @@ async function createDirectoryTree(webcontainerInstance, terminal) {
     }))
 }
 
+async function createNewFile(webcontainerInstance, terminal) {
+    await webcontainerInstance.fs.writeFile('app/new-file.txt', '');
+    window.refreshDirectoryTree();
+}
+
 async function callAl(){
     const directoryTree = await webcontainerInstance.spawn('node', ['directory-tree.js']);
     directoryTree.output.pipeTo(new WritableStream({
@@ -261,17 +266,21 @@ async function readDirectoryJson(webcontainerInstance){
 
 window.refreshDirectoryTree = function(){
 
-  createDirectoryTree(webcontainer, terminal).then(() => {
-    readDirectoryJson(webcontainer).then(() => {
-        console.log(webcontainer);
-      console.log('nice!');
-    }).catch((error) => {
-      console.log('error refreshing directory: ');
-      console.log(error);
+    createDirectoryTree(webcontainer, terminal).then(() => {
+        readDirectoryJson(webcontainer).then(() => {
+            console.log(webcontainer);
+        }).catch((error) => {
+            console.log('error refreshing directory: ');
+            console.log(error);
+        });
     });
-});
+}
 
-  
+window.addNewFile = function(){
+
+    createNewFile(webcontainer, terminal).then(() => {
+        console.log('created');
+    });
 }
 
 const codeTextareaEl = document.getElementById('code');

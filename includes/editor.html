@@ -1,89 +1,118 @@
-<div x-data="{
-    monacoContent: '',
-    monacoLanguage: 'php',
-    monacoPlaceholder: true,
-    monacoPlaceholderText: 'Start typing here',
-    monacoLoader: true,
-    monacoFontSize: '15px',
-    monacoId: $id('monaco-editor'),
-    monacoEditor(editor){
-        editor.onDidChangeModelContent((e) => {
-            this.monacoContent = editor.getValue();
-            this.updatePlaceholder(editor.getValue());
-        });
-
-        editor.onDidBlurEditorWidget(() => {
-            this.updatePlaceholder(editor.getValue());
-        });
-
-        editor.onDidFocusEditorWidget(() => {
-            this.updatePlaceholder(editor.getValue());
-        });
-    },
-    updatePlaceholder: function(value) {
-        if (value == '') {
-            this.monacoPlaceholder = true;
-            return;
-        }
-        this.monacoPlaceholder = false;
-    },
-    monacoEditorFocus(){
-        document.getElementById(this.monacoId).dispatchEvent(new CustomEvent('monaco-editor-focused', { monacoId: this.monacoId }));
-    },
-    monacoEditorAddLoaderScriptToHead() {
-        script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js';
-        document.head.appendChild(script);
-    }
-}"
-x-init="
-    activeEditorId = monacoId;
-    if(typeof _amdLoaderGlobal == 'undefined'){
-        monacoEditorAddLoaderScriptToHead();
-    }
-
-    monacoLoaderInterval = setInterval(function(){
-        if(typeof _amdLoaderGlobal !== 'undefined'){
-
-            // Based on https://jsfiddle.net/developit/bwgkr6uq/ which works without needing service worker. Provided by loader.min.js.
-            require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' }});
-            let proxy = URL.createObjectURL(new Blob([` self.MonacoEnvironment = { baseUrl: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min' }; importScripts('https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/base/worker/workerMain.min.js');`], { type: 'text/javascript' }));
-            window.MonacoEnvironment = { getWorkerUrl: () => proxy };
-
-            require(['vs/editor/editor.main'], function() {
-                
-                monacoTheme = {'base':'vs-dark','inherit':true,'rules':[{'background':'14181f','token':''},{'foreground':'aeaeae','token':'comment'},{'foreground':'d8fa3c','token':'constant'},{'foreground':'ff6400','token':'entity'},{'foreground':'fbde2d','token':'keyword'},{'foreground':'fbde2d','token':'storage'},{'foreground':'61ce3c','token':'string'},{'foreground':'61ce3c','token':'meta.verbatim'},{'foreground':'8da6ce','token':'support'},{'foreground':'ab2a1d','fontStyle':'italic','token':'invalid.deprecated'},{'foreground':'f8f8f8','background':'9d1e15','token':'invalid.illegal'},{'foreground':'ff6400','fontStyle':'italic','token':'entity.other.inherited-class'},{'foreground':'ff6400','token':'string constant.other.placeholder'},{'foreground':'becde6','token':'meta.function-call.py'},{'foreground':'7f90aa','token':'meta.tag'},{'foreground':'7f90aa','token':'meta.tag entity'},{'foreground':'ffffff','token':'entity.name.section'},{'foreground':'d5e0f3','token':'keyword.type.variant'},{'foreground':'f8f8f8','token':'source.ocaml keyword.operator.symbol'},{'foreground':'8da6ce','token':'source.ocaml keyword.operator.symbol.infix'},{'foreground':'8da6ce','token':'source.ocaml keyword.operator.symbol.prefix'},{'fontStyle':'underline','token':'source.ocaml keyword.operator.symbol.infix.floating-point'},{'fontStyle':'underline','token':'source.ocaml keyword.operator.symbol.prefix.floating-point'},{'fontStyle':'underline','token':'source.ocaml constant.numeric.floating-point'},{'background':'ffffff08','token':'text.tex.latex meta.function.environment'},{'background':'7a96fa08','token':'text.tex.latex meta.function.environment meta.function.environment'},{'foreground':'fbde2d','token':'text.tex.latex support.function'},{'foreground':'ffffff','token':'source.plist string.unquoted'},{'foreground':'ffffff','token':'source.plist keyword.operator'}],'colors':{'editor.foreground':'#F8F8F8','editor.background':'#14181f','editor.selectionBackground':'#253B76','editor.lineHighlightBackground':'#FFFFFF0F','editorCursor.foreground':'#FFFFFFA6','editorWhitespace.foreground':'#FFFFFF40'}};
-                monaco.editor.defineTheme('blackboard', monacoTheme);
-                document.getElementById(monacoId).editor = monaco.editor.create($refs.monacoEditorElement, {
-                    value: monacoContent,
-                    theme: 'blackboard',
-                    fontSize: monacoFontSize,
-                    lineNumbersMinChars: 3,
-                    automaticLayout: true,
-                    language: monacoLanguage,
-                    minimap: { enabled: false }
+<div class="flex flex-col items-stretch w-1/2 editor h-100 justify-stretch">
+    <div x-show="appReady" class="w-full h-full border-gray-700 bordr-b">
+        <!-- Editor INCLUDE -->
+        <div x-data="{
+            monacoContent: '',
+            monacoLanguage: 'php',
+            monacoPlaceholder: true,
+            monacoPlaceholderText: 'Select a file to begin editing it here...',
+            monacoLoader: true,
+            monacoFontSize: '15px',
+            monacoId: $id('monaco-editor'),
+            monacoEditor(editor){
+                editor.onDidChangeModelContent((e) => {
+                    this.monacoContent = editor.getValue();
+                    this.updatePlaceholder(editor.getValue());
                 });
-                monacoEditor(document.getElementById(monacoId).editor);
-                document.getElementById(monacoId).addEventListener('monaco-editor-focused', function(event){
-                    document.getElementById(monacoId).editor.focus();
+        
+                editor.onDidBlurEditorWidget(() => {
+                    this.updatePlaceholder(editor.getValue());
                 });
-                updatePlaceholder(document.getElementById(monacoId).editor.getValue());
-                
-            });
+        
+                editor.onDidFocusEditorWidget(() => {
+                    this.updatePlaceholder(editor.getValue());
+                });
+            },
+            updatePlaceholder: function(value) {
+                if (value == '') {
+                    this.monacoPlaceholder = true;
+                    return;
+                }
+                this.monacoPlaceholder = false;
+            },
+            monacoEditorFocus(){
+                document.getElementById(this.monacoId).dispatchEvent(new CustomEvent('monaco-editor-focused', { monacoId: this.monacoId }));
+            },
+            monacoEditorAddLoaderScriptToHead() {
+                script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js';
+                document.head.appendChild(script);
+            }
+        }"
+        x-init="
+            activeEditorId = monacoId;
+            if(typeof _amdLoaderGlobal == 'undefined'){
+                monacoEditorAddLoaderScriptToHead();
+            }
+        
+            monacoLoaderInterval = setInterval(function(){
+                if(typeof _amdLoaderGlobal !== 'undefined'){
+        
+                    // Based on https://jsfiddle.net/developit/bwgkr6uq/ which works without needing service worker. Provided by loader.min.js.
+                    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' }});
+                    let proxy = URL.createObjectURL(new Blob([` self.MonacoEnvironment = { baseUrl: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min' }; importScripts('https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/base/worker/workerMain.min.js');`], { type: 'text/javascript' }));
+                    window.MonacoEnvironment = { getWorkerUrl: () => proxy };
+        
+                    require(['vs/editor/editor.main'], function() {
+                        
+                        monacoTheme = {'base':'vs-dark','inherit':true,'rules':[{'background':'14181f','token':''},{'foreground':'aeaeae','token':'comment'},{'foreground':'d8fa3c','token':'constant'},{'foreground':'ff6400','token':'entity'},{'foreground':'fbde2d','token':'keyword'},{'foreground':'fbde2d','token':'storage'},{'foreground':'61ce3c','token':'string'},{'foreground':'61ce3c','token':'meta.verbatim'},{'foreground':'8da6ce','token':'support'},{'foreground':'ab2a1d','fontStyle':'italic','token':'invalid.deprecated'},{'foreground':'f8f8f8','background':'9d1e15','token':'invalid.illegal'},{'foreground':'ff6400','fontStyle':'italic','token':'entity.other.inherited-class'},{'foreground':'ff6400','token':'string constant.other.placeholder'},{'foreground':'becde6','token':'meta.function-call.py'},{'foreground':'7f90aa','token':'meta.tag'},{'foreground':'7f90aa','token':'meta.tag entity'},{'foreground':'ffffff','token':'entity.name.section'},{'foreground':'d5e0f3','token':'keyword.type.variant'},{'foreground':'f8f8f8','token':'source.ocaml keyword.operator.symbol'},{'foreground':'8da6ce','token':'source.ocaml keyword.operator.symbol.infix'},{'foreground':'8da6ce','token':'source.ocaml keyword.operator.symbol.prefix'},{'fontStyle':'underline','token':'source.ocaml keyword.operator.symbol.infix.floating-point'},{'fontStyle':'underline','token':'source.ocaml keyword.operator.symbol.prefix.floating-point'},{'fontStyle':'underline','token':'source.ocaml constant.numeric.floating-point'},{'background':'ffffff08','token':'text.tex.latex meta.function.environment'},{'background':'7a96fa08','token':'text.tex.latex meta.function.environment meta.function.environment'},{'foreground':'fbde2d','token':'text.tex.latex support.function'},{'foreground':'ffffff','token':'source.plist string.unquoted'},{'foreground':'ffffff','token':'source.plist keyword.operator'}],'colors':{'editor.foreground':'#F8F8F8','editor.background':'#14181f','editor.selectionBackground':'#253B76','editor.lineHighlightBackground':'#FFFFFF0F','editorCursor.foreground':'#FFFFFFA6','editorWhitespace.foreground':'#FFFFFF40'}};
+                        monaco.editor.defineTheme('blackboard', monacoTheme);
+                        document.getElementById(monacoId).editor = monaco.editor.create($refs.monacoEditorElement, {
+                            value: monacoContent,
+                            theme: 'blackboard',
+                            fontSize: monacoFontSize,
+                            lineNumbersMinChars: 3,
+                            automaticLayout: true,
+                            language: monacoLanguage,
+                            minimap: { enabled: false }
+                        });
+                        monacoEditor(document.getElementById(monacoId).editor);
+                        document.getElementById(monacoId).addEventListener('monaco-editor-focused', function(event){
+                            document.getElementById(monacoId).editor.focus();
+                        });
+                        updatePlaceholder(document.getElementById(monacoId).editor.getValue());
+                        
+                    });
+        
+                    clearInterval(monacoLoaderInterval);
+                    monacoLoader = false;
+                }
+            }, 5);
+        " :id="monacoId"
+        @set-editor=" event.detail.content"
+        class="flex flex-col items-center relative justify-start w-full bg-[#14181f] min-h-[250px] pt-3 h-full">
+            <div x-show="monacoLoader" class="flex absolute inset-0 z-20 justify-center items-center w-full h-full duration-1000 ease-out">
+                <svg class="w-4 h-4 text-gray-400 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            </div>
+            
+            <div x-show="!monacoLoader" class="absolute inset-0 z-10 w-full h-full">
+                <div x-ref="monacoEditorElement" class="w-full h-full text-lg"></div>
+                <div x-ref="monacoPlaceholderElement" x-show="monacoPlaceholder" @click="monacoEditorFocus()" :style="'font-size: ' + monacoFontSize" class="absolute top-0 left-0 z-50 mt-0.5 ml-14 w-full font-mono text-sm text-gray-500 -translate-x-0.5" x-text="monacoPlaceholderText"></div>
+            </div>
+        </div>
+        <!-- Editor INCLUDE END-->
+    </div>
+    <div x-show="!appReady" class="flex justify-center items-center w-full h-full border-b border-gray-800">
+        <svg class="w-32 h-32 text-white opacity-10" viewBox="0 -.11376601 49.74245785 51.31690859" xmlns="http://www.w3.org/2000/svg"><path d="M49.626 11.564a.809.809 0 0 1 .028.209v10.972a.8.8 0 0 1-.402.694l-9.209 5.302V39.25c0 .286-.152.55-.4.694L20.42 51.01c-.044.025-.092.041-.14.058-.018.006-.035.017-.054.022a.805.805 0 0 1-.41 0c-.022-.006-.042-.018-.063-.026-.044-.016-.09-.03-.132-.054L.402 39.944A.801.801 0 0 1 0 39.25V6.334c0-.072.01-.142.028-.21.006-.023.02-.044.028-.067.015-.042.029-.085.051-.124.015-.026.037-.047.055-.071.023-.032.044-.065.071-.093.023-.023.053-.04.079-.06.029-.024.055-.05.088-.069h.001l9.61-5.533a.802.802 0 0 1 .8 0l9.61 5.533h.002c.032.02.059.045.088.068.026.02.055.038.078.06.028.029.048.062.072.094.017.024.04.045.054.071.023.04.036.082.052.124.008.023.022.044.028.068a.809.809 0 0 1 .028.209v20.559l8.008-4.611v-10.51c0-.07.01-.141.028-.208.007-.024.02-.045.028-.068.016-.042.03-.085.052-.124.015-.026.037-.047.054-.071.024-.032.044-.065.072-.093.023-.023.052-.04.078-.06.03-.024.056-.05.088-.069h.001l9.611-5.533a.801.801 0 0 1 .8 0l9.61 5.533c.034.02.06.045.09.068.025.02.054.038.077.06.028.029.048.062.072.094.018.024.04.045.054.071.023.039.036.082.052.124.009.023.022.044.028.068zm-1.574 10.718v-9.124l-3.363 1.936-4.646 2.675v9.124l8.01-4.611zm-9.61 16.505v-9.13l-4.57 2.61-13.05 7.448v9.216zM1.602 7.719v31.068L19.22 48.93v-9.214l-9.204-5.209-.003-.002-.004-.002c-.031-.018-.057-.044-.086-.066-.025-.02-.054-.036-.076-.058l-.002-.003c-.026-.025-.044-.056-.066-.084-.02-.027-.044-.05-.06-.078l-.001-.003c-.018-.03-.029-.066-.042-.1-.013-.03-.03-.058-.038-.09v-.001c-.01-.038-.012-.078-.016-.117-.004-.03-.012-.06-.012-.09V12.33L4.965 9.654 1.602 7.72zm8.81-5.994L2.405 6.334l8.005 4.609 8.006-4.61-8.006-4.608zm4.164 28.764 4.645-2.674V7.719l-3.363 1.936-4.646 2.675v20.096zM39.243 7.164l-8.006 4.609 8.006 4.609 8.005-4.61zm-.801 10.605-4.646-2.675-3.363-1.936v9.124l4.645 2.674 3.364 1.937zM20.02 38.33l11.743-6.704 5.87-3.35-8-4.606-9.211 5.303-8.395 4.833z" fill="currentColor"/></svg>
+    </div>
+    <!-- <textarea id="code" class="w-full h-full p-5 text-white bg-[#14181f] border-b border-gray-600 outline-none focus:outline-none">I am a textarea 2</textarea> -->
+    <div x-data="{ active: 1 }" class="flex relative flex-col items-center w-full h-1/3">
+        <button x-show="active == 1" @click="refreshApp()" class="flex absolute bottom-0 right-0 bg-black bg-opacity-60 -translate-y-14 -mb-2 mr-2 z-40 items-center justify-center h-auto text-gray-500 w-auto text-[0.6rem] px-2 py-1.5 space-x-1.5 rounded-full hover:text-gray-300" x-cloak>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
+              </svg>
+            <span>Reboot</span>                              
+        </button>
+        <div class="flex items-start w-full text-[0.6rem] uppercase justify-start border-b border-neutral-800">
+            <button @click="active=1" class="px-2 py-1.5 border-r border-neutral-800"
+                :class="{ 'bg-neutral-950 text-neutral-400' : active == 1, 'hover:bg-neutral-950 text-neutral-600 hover:text-neutral-300' : active != 1 }">Processes</button>
+            <button @click="active=2" class="px-2 py-1.5 border-r border-neutral-800" 
+                :class="{ 'bg-neutral-950 text-neutral-400' : active == 2, 'hover:bg-neutral-950 text-neutral-600 hover:text-neutral-300' : active != 2 }">Terminal</button>
+        </div>
+        <div class="flex relative items-center w-full h-full">
+            <div x-show="active == 1" id="terminal" class="w-full h-full" ></div>
+            <div x-show="active == 2" id="terminals" class="w-full h-full"></div>
+        </div>
+    </div>
 
-            clearInterval(monacoLoaderInterval);
-            monacoLoader = false;
-        }
-    }, 5);
-" :id="monacoId"
-@set-editor=" event.detail.content"
-class="flex flex-col items-center relative justify-start w-full bg-[#14181f] min-h-[250px] pt-3 h-full">
-<div x-show="monacoLoader" class="absolute inset-0 z-20 flex items-center justify-center w-full h-full duration-1000 ease-out">
-    <svg class="w-4 h-4 text-gray-400 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-</div>
-
-<div x-show="!monacoLoader" class="absolute inset-0 z-10 w-full h-full">
-    <div x-ref="monacoEditorElement" class="w-full h-full text-lg"></div>
-    <div x-ref="monacoPlaceholderElement" x-show="monacoPlaceholder" @click="monacoEditorFocus()" :style="'font-size: ' + monacoFontSize" class="w-full text-sm font-mono absolute z-50 text-gray-500 ml-14 -translate-x-0.5 mt-0.5 left-0 top-0" x-text="monacoPlaceholderText"></div>
-</div>
 </div>

@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.png">
+    <!-- {tailwindcss} -->
+    <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body class="overflow-hidden w-screen h-screen">
+    
+    <div x-data="{
+        sidebarOpen: true,
+        serverReady: false,
+        appReady: false,
+        containerURL: '',
+        url: '/',
+        getURL() {
+          if(this.appReady && this.serverReady){
+            return this.containerURL + this.url;
+          } else {
+            return 'about:blank';
+          }
+        },
+        getAddressBarValue() {
+          if(this.appReady && this.serverReady){
+            //strippedUrl =  new URL(this.containerURL);
+            if(this.url == ''){
+              this.url = '/';
+            }
+            return this.url;
+          } else {
+            return '/';
+          }
+        },
+        callAlert(){
+          alert('hit');
+        },
+        submitURL(event){
+          this.url = event.target.value;
+        }
+      }" @server-ready.window="serverReady=true"
+       @app-ready.window="appReady=true"
+       @set-url.window="containerURL=event.detail.url" class="flex flex-col w-screen h-screen">
+       <textarea id="indexJs" class="hidden p-5 w-full h-1/2 text-white bg-black border-b border-gray-700 outline-none focus:outline-none">I am a textarea</textarea>
+        <div class="flex flex-1 items-stretch w-full h-full justify-stretch">
+    
+            <include src="toolbar.html"></include>
+            <include src="sidebar.html"></include>
+    
+            <div class="flex w-full bg-[#14181f] h-100">
+                <include src="editor.html"></include>
+                <include src="browser.html"></include>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/js/main.js"></script>
+    <script>
+        mainJSReady = setInterval(function(){
+           console.log('got here');
+            loadTheApp(function(){
+              clearInterval(mainJSReady);
+            });
+  
+          }, 2000);
+  
+            function loadTheApp(callback){
+                if(typeof loadApp == 'function'){
+                    console.log('gtting');
+            
+                // org = window.PineconeRouter.currentContext.params.org;
+                // repo = window.PineconeRouter.currentContext.params.repo;
+                loadApp();
+                if(typeof callback == 'function'){
+                    callback();
+                }
+                }
+            }
+      </script>
+</body>
+</html>
